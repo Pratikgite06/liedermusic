@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leider Music App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Base styles for dark mode */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+            display: flex;
+            flex-direction: column; /* Changed to column for footer */
+            justify-content: space-between; /* Distribute space */
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+            padding-top: 20px; /* Padding for top content */
+            padding-bottom: 80px; /* Space for fixed footer */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        .main-content {
+            flex-grow: 1; /* Allow content to grow */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align content to top of available space */
+            padding: 0 20px; /* Horizontal padding */
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 100%;
+            max-width: 500px;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease, border-color 0.5s ease;
+        }
+        .control-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for buttons */
+        }
+        .control-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .control-button:active {
+            transform: scale(0.95);
+        }
+        #playPauseButton {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            padding: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        #playPauseButton:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        input[type="text"], input[type="file"], textarea, select {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Subtle inner shadow for inputs */
+            transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+        }
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.3); /* Focus ring */
+        }
+        input[type="file"] {
+            padding: 0.75rem; /* Adjust padding for file input */
+            cursor: pointer;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        input[type="file"]::before {
+            content: 'Select File';
+            display: inline-block;
+            background: linear-gradient(to top, #f9f9f9, #e3e3e3);
+            border: 1px solid #999;
+            border-radius: 5px;
+            padding: 8px 12px;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 10pt;
+            color: #333;
+        }
+        input[type="file"]:hover::before {
+            border-color: black;
+        }
+        input[type="file"]:active::before {
+            background: -webkit-linear-gradient(to top, #e3e3e3, #f9f9f9);
+        }
+        select option {
+            background-color: #333; /* Dark background for options in dark mode */
+            color: white;
+        }
+
+        .llm-button {
+            background-color: #4CAF50; /* Green */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Space between text and sparkle */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for buttons */
+        }
+        .llm-button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px); /* Slight lift on hover */
+        }
+        .llm-button:active {
+            transform: translateY(0); /* Reset on click */
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* Press effect */
+        }
+        .output-box {
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap; /* Preserves whitespace and wraps text */
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Subtle inner shadow */
+            transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Message Box Styles */
+        #messageBox {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        #messageBox > div {
+            background-color: #fff;
+            color: #333;
+            border-radius: 15px; /* Slightly more rounded */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Stronger shadow */
+        }
+        #messageBoxClose {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for button */
+        }
+        #messageBoxClose:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Section separator */
+        .section-separator {
+            width: 100%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 2rem 0;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Playlist item specific styling for dark/light mode */
+        #playlistItems li {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Light Mode Styles (applied when body has .light-mode class) */
+        body.light-mode {
+            background: linear-gradient(to right, #e0c3fc 0%, #8ec5fc 100%);
+            color: #333; /* Darker text for light mode */
+        }
+        body.light-mode .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .control-button {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        body.light-mode .control-button:hover {
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+        body.light-mode #playPauseButton {
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+        body.light-mode #playPauseButton:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        body.light-mode input[type="text"],
+        body.light-mode input[type="file"],
+        body.light-mode textarea,
+        body.light-mode select {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        body.light-mode input[type="text"]::placeholder,
+        body.light-mode textarea::placeholder {
+            color: rgba(51, 51, 51, 0.7);
+        }
+        body.light-mode input[type="text"]:focus,
+        body.light-mode textarea:focus,
+        body.light-mode select:focus {
+            border-color: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+        body.light-mode select option {
+            background-color: #f0f0f0; /* Light background for options in light mode */
+            color: #333;
+        }
+        body.light-mode .llm-button {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        body.light-mode .output-box {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        body.light-mode .section-separator {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode #playlistItems li {
+            color: #333;
+        }
+        body.light-mode #playlistItems li.hover\:bg-gray-700:hover {
+            background-color: rgba(0, 0, 0, 0.08); /* Lighter hover for light mode */
+        }
+        body.light-mode #playlistItems li .text-red-300 {
+            color: #dc2626; /* Darker red for light mode */
+        }
+        body.light-mode #playlistItems li .hover\:text-red-500:hover {
+            color: #ef4444; /* Darker red hover for light mode */
+        }
+        /* Specific overrides for section backgrounds in light mode */
+        body.light-mode .bg-opacity-5 {
+            background-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        body.light-mode #userIdDisplay {
+            color: rgba(51, 51, 51, 0.7);
+        }
+
+        /* Dark/Light Mode Toggle Button */
+        #themeToggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #themeToggle:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        body.light-mode #themeToggle {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        body.light-mode #themeToggle:hover {
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 0;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            transition: background-color 0.5s ease;
+            z-index: 1000; /* Ensure it's on top */
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+        .bottom-nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .bottom-nav-item.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .bottom-nav-item:hover {
+            color: #fff;
+        }
+
+        /* Light mode for bottom nav */
+        body.light-mode .bottom-nav {
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+        }
+        body.light-mode .bottom-nav-item {
+            color: rgba(51, 51, 51, 0.7);
+        }
+        body.light-mode .bottom-nav-item.active {
+            color: #333;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        body.light-mode .bottom-nav-item:hover {
+            color: #333;
+        }
+
+        /* Seek Bar Styles */
+        #seekBar {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            outline: none;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+        #seekBar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #seekBar::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        body.light-mode #seekBar {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        body.light-mode #seekBar::-webkit-slider-thumb {
+            background: #333;
+        }
+        body.light-mode #seekBar::-moz-range-thumb {
+            background: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="container flex flex-col items-center space-y-6">
+            <h1 class="text-4xl font-bold mb-4 text-center">Leider Music</h1>
+
+            <button id="themeToggle" aria-label="Toggle dark and light mode">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+
+            <div id="userIdDisplay" class="text-sm text-gray-200 mb-4 text-center" aria-live="polite">
+                User ID: Loading...
+            </div>
+
+            <!-- Home Section -->
+            <div id="homeSection" class="w-full flex flex-col items-center space-y-4 p-4 rounded-lg bg-white bg-opacity-5">
+                <h2 class="text-2xl font-semibold mb-2">Now Playing</h2>
+                <div class="text-center">
+                    <p id="songTitle" class="text-2xl font-semibold">Song Title</p>
+                    <p id="artistName" class="text-lg text-gray-200">Artist Name</p>
+                </div>
+
+                <!-- NEW: Seek Bar and Time Display -->
+                <div class="w-full mt-4">
+                    <input type="range" id="seekBar" value="0" class="w-full">
+                    <div class="flex justify-between text-xs mt-1">
+                        <span id="currentTimeDisplay">0:00</span>
+                        <span id="durationDisplay">0:00</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center space-x-6 mt-4">
+                    <button id="prevButton" class="control-button w-12 h-12" aria-label="Previous song">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    <button id="playPauseButton" class="control-button" aria-label="Play or pause song">
+                        <i id="playPauseIcon" class="fas fa-play"></i>
+                    </button>
+                    <button id="nextButton" class="control-button w-12 h-12" aria-label="Next song">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                </div>
+                <button id="downloadCurrentSongButton" class="llm-button !bg-gray-700 hover:!bg-gray-800 mt-4" aria-label="Download current song">
+                    <i class="fas fa-download mr-2"></i> Download Song
+                </button>
+                <div class="section-separator"></div>
+                <h3 class="text-xl font-semibold mb-3 text-center">Current Playlist: <span id="homeCurrentPlaylistNameDisplay">My Playlist</span></h3>
+                <ul id="homePlaylistItems" class="output-box h-auto max-h-40">
+                    <!-- Simplified playlist items for home view -->
+                </ul>
+            </div>
+
+            <!-- Search Section -->
+            <div id="searchSection" class="w-full flex-col items-center space-y-4 p-4 rounded-lg bg-white bg-opacity-5 hidden">
+                <h2 class="text-2xl font-semibold mb-2">Discover & Search Music</h2>
+                <input type="text" id="searchInput" placeholder="Search for songs or artists..." class="mb-4">
+                <button id="performSearchButton" class="llm-button !bg-blue-500 hover:!bg-blue-600" aria-label="Perform search">Search</button>
+                <ul id="searchResultsOutput" class="output-box">
+                    Search results will appear here. Click a song to add it to your current playlist and play, or play if already in playlist.
+                </ul>
+            </div>
+
+            <!-- Playlists Section -->
+            <div id="playlistsSection" class="w-full flex-col items-center space-y-6 hidden">
+                <!-- Playlist Management Section -->
+                <div class="w-full p-4 rounded-lg bg-white bg-opacity-5">
+                    <h3 class="text-xl font-semibold mb-3 text-center">Playlist Management</h3>
+
+                    <label for="playlistSelect" class="block text-sm font-medium text-gray-200 mb-2">Select Playlist:</label>
+                    <select id="playlistSelect" class="mb-4 p-2 rounded-lg w-full">
+                        <!-- Playlists will be loaded here -->
+                    </select>
+
+                    <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                        <button id="loadSelectedPlaylistButton" class="llm-button !bg-blue-600 hover:!bg-blue-700" aria-label="Load selected playlist">
+                            Load Selected
+                        </button>
+                        <button id="deleteSelectedPlaylistButton" class="llm-button !bg-red-600 hover:!bg-red-700" aria-label="Delete selected playlist">
+                            Delete Selected
+                        </button>
+                    </div>
+
+                    <div class="section-separator !my-4"></div>
+
+                    <label for="newPlaylistName" class="sr-only">New Playlist Name</label>
+                    <input type="text" id="newPlaylistName" placeholder="New Playlist Name" class="mb-4" aria-label="Enter new playlist name">
+                    <button id="createNewPlaylistButton" class="llm-button !bg-purple-600 hover:!bg-purple-700" aria-label="Create a new playlist">
+                        <i class="fas fa-plus mr-2"></i> Create New Playlist
+                    </button>
+                </div>
+
+                <div class="section-separator"></div>
+
+                <div class="w-full p-4 rounded-lg bg-white bg-opacity-5" id="currentPlaylistSection">
+                    <h3 class="text-xl font-semibold mb-3 text-center">Current Playlist: <span id="currentPlaylistNameDisplay">My Playlist</span></h3>
+                    <ul id="playlistItems" class="output-box h-auto max-h-60">
+                    </ul>
+                    <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-4" id="currentPlaylistButtonsContainer">
+                        <button id="saveCurrentPlaylistButton" class="llm-button !bg-blue-600 hover:!bg-blue-700" aria-label="Save current playlist">
+                            Save Current Playlist
+                        </button>
+                        <button id="clearCurrentPlaylistButton" class="llm-button !bg-red-600 hover:!bg-red-700" aria-label="Clear all songs from current playlist">
+                            Clear Current Playlist
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section-separator"></div>
+
+                <!-- Import Playlist Section -->
+                <div class="w-full p-4 rounded-lg bg-white bg-opacity-5" id="importSectionContainer">
+                    <h3 class="text-xl font-semibold mb-3 text-center">Import Songs to Current Playlist from File</h3>
+                    <p class="text-sm text-gray-300 mb-4 text-center">
+                        Upload a .txt or .csv file. <br>
+                        For .txt: Each line should be "Title - Artist" or "Title | Artist | Audio_URL"<br>
+                        For .csv: Must have headers "Title,Artist,URL"
+                    </p>
+                    <label for="importFileInput" class="sr-only">Import Playlist File</label>
+                    <input type="file" id="importFileInput" accept=".txt,.csv" class="mb-4" aria-label="Select a text or CSV file to import playlist">
+                    <button id="importFileButton" class="llm-button !bg-green-600 hover:!bg-green-700" aria-label="Import playlist from selected file">
+                        Import Songs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item active" id="navHome" aria-label="Go to Home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </div>
+        <div class="bottom-nav-item" id="navSearch" aria-label="Go to Search">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </div>
+        <div class="bottom-nav-item" id="navPlaylists" aria-label="Go to Playlists">
+            <i class="fas fa-list-music"></i>
+            <span>Playlists</span>
+        </div>
+    </nav>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="messageBoxContent">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center text-gray-800 max-w-sm w-full">
+            <p id="messageBoxContent" class="mb-4 text-lg"></p>
+            <button id="messageBoxClose" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg" aria-label="Close message">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Box -->
+    <div id="confirmationBox" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="confirmationBoxContent">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center text-gray-800 max-w-sm w-full mx-4">
+            <p id="confirmationBoxContent" class="mb-6 text-lg"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmationBoxCancel" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105" aria-label="Cancel action">
+                    Cancel
+                </button>
+                <button id="confirmationBoxConfirm" class="bg-red-600 hover:!bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105" aria-label="Confirm action">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADDED: The actual audio player element, hidden from view -->
+    <audio id="audioPlayer" class="hidden"></audio>
+
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase config and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let userId = 'loading...';
+        let userPlaylistsCollectionRef; // Firestore collection reference for user's playlists
+
+        let currentPlaylist = [];
+        let currentSongIndex = 0;
+        let availablePlaylists = []; // Stores { id: playlistId, name: playlistName }
+        let selectedPlaylistId = 'myPlaylist'; // Default to 'myPlaylist'
+        
+        // ** FIXED: Using a reliable CDN link for the pre-loaded song **
+        const preloadedSongs = [
+            {
+                title: "Dil Mere",
+                artist: "local train",
+                src: "https://cdn.jsdelivr.net/gh/Pratikgite06/Songs@main/Dil%20Mere%20-%20Aalas%20Ka%20Pedh%20320%20Kbps.mp3"
+            }
+        ];
+
+        // DOM elements
+        const audio = document.getElementById('audioPlayer'); // Get the audio element
+        const songTitleElement = document.getElementById('songTitle');
+        const artistNameElement = document.getElementById('artistName');
+        const playPauseButton = document.getElementById('playPauseButton');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const downloadCurrentSongButton = document.getElementById('downloadCurrentSongButton');
+        const seekBar = document.getElementById('seekBar');
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const durationDisplay = document.getElementById('durationDisplay');
+
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxClose = document.getElementById('messageBoxClose');
+
+        // Confirmation Box elements
+        const confirmationBox = document.getElementById('confirmationBox');
+        const confirmationBoxContent = document.getElementById('confirmationBoxContent');
+        const confirmationBoxConfirm = document.getElementById('confirmationBoxConfirm');
+        const confirmationBoxCancel = document.getElementById('confirmationBoxCancel');
+
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        // Playlist Management elements
+        const playlistSelect = document.getElementById('playlistSelect');
+        const loadSelectedPlaylistButton = document.getElementById('loadSelectedPlaylistButton');
+        const deleteSelectedPlaylistButton = document.getElementById('deleteSelectedPlaylistButton');
+        const newPlaylistNameInput = document.getElementById('newPlaylistName');
+        const createNewPlaylistButton = document.getElementById('createNewPlaylistButton');
+        const currentPlaylistNameDisplay = document.getElementById('currentPlaylistNameDisplay');
+        const playlistItemsElement = document.getElementById('playlistItems');
+        const saveCurrentPlaylistButton = document.getElementById('saveCurrentPlaylistButton');
+        const clearCurrentPlaylistButton = document.getElementById('clearCurrentPlaylistButton');
+
+        // Import File elements
+        const importFileInput = document.getElementById('importFileInput');
+        const importFileButton = document.getElementById('importFileButton');
+        const importSectionContainer = document.getElementById('importSectionContainer');
+
+        // Section containers
+        const homeSection = document.getElementById('homeSection');
+        const searchSection = document.getElementById('searchSection');
+        const playlistsSection = document.getElementById('playlistsSection');
+
+        // Search Section elements
+        const searchInput = document.getElementById('searchInput');
+        const performSearchButton = document.getElementById('performSearchButton');
+        const searchResultsOutput = document.getElementById('searchResultsOutput');
+
+        // Home Section specific elements
+        const homeCurrentPlaylistNameDisplay = document.getElementById('homeCurrentPlaylistNameDisplay');
+        const homePlaylistItems = document.getElementById('homePlaylistItems');
+
+        // Navigation elements
+        const navHome = document.getElementById('navHome');
+        const navSearch = document.getElementById('navSearch');
+        const navPlaylists = document.getElementById('navPlaylists');
+
+        /**
+         * Displays a custom message box.
+         * @param {string} message - The message to display.
+         */
+        function showMessage(message) {
+            messageBoxContent.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        messageBoxClose.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        /**
+         * Shows a confirmation dialog.
+         * @param {string} message - The message to display.
+         * @param {function} onConfirm - The callback function to execute if the user confirms.
+         */
+        function showConfirmation(message, onConfirm) {
+            confirmationBoxContent.textContent = message;
+            confirmationBox.classList.remove('hidden');
+
+            const newConfirmButton = confirmationBoxConfirm.cloneNode(true);
+            confirmationBoxConfirm.parentNode.replaceChild(newConfirmButton, confirmationBoxConfirm);
+            
+            const newCancelButton = confirmationBoxCancel.cloneNode(true);
+            confirmationBoxCancel.parentNode.replaceChild(newCancelButton, confirmationBoxCancel);
+
+            const closeDialog = () => {
+                confirmationBox.classList.add('hidden');
+            };
+
+            newConfirmButton.addEventListener('click', () => {
+                onConfirm();
+                closeDialog();
+            });
+
+            newCancelButton.addEventListener('click', closeDialog);
+        }
+
+        /**
+         * Loads a song into the audio player and updates the UI.
+         * @param {number} index - The index of the song in the currentPlaylist array.
+         */
+        function loadSong(index) {
+            if (!audio || currentPlaylist.length === 0) {
+                songTitleElement.textContent = "No song loaded";
+                artistNameElement.textContent = "";
+                if (audio) {
+                    audio.src = "";
+                    audio.pause();
+                }
+                playPauseIcon.classList.remove('fa-pause');
+                playPauseIcon.classList.add('fa-play');
+                downloadCurrentSongButton.disabled = true;
+                renderPlaylistsForAllViews();
+                return;
+            }
+            const song = currentPlaylist[index];
+            songTitleElement.textContent = song.title;
+            artistNameElement.textContent = song.artist;
+            audio.src = song.src;
+            audio.load();
+            if (!audio.paused) {
+                audio.play();
+                playPauseIcon.classList.remove('fa-play');
+                playPauseIcon.classList.add('fa-pause');
+            } else {
+                playPauseIcon.classList.remove('fa-pause');
+                playPauseIcon.classList.add('fa-play');
+            }
+            downloadCurrentSongButton.disabled = false;
+            renderPlaylistsForAllViews();
+        }
+
+        /**
+         * Toggles play/pause state of the current song.
+         */
+        function playPauseSong() {
+            if (!audio.src) {
+                return;
+            }
+            if (audio.paused) {
+                audio.play();
+                playPauseIcon.classList.remove('fa-play');
+                playPauseIcon.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playPauseIcon.classList.remove('fa-pause');
+                playPauseIcon.classList.add('fa-play');
+            }
+        }
+
+        /**
+         * Loads and plays the next song in the playlist.
+         */
+        function nextSong() {
+            if (currentPlaylist.length === 0) return;
+            currentSongIndex = (currentSongIndex + 1) % currentPlaylist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+        }
+
+        /**
+         * Loads and plays the previous song in the playlist.
+         */
+        function prevSong() {
+            if (currentPlaylist.length === 0) return;
+            currentSongIndex = (currentSongIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+            loadSong(currentSongIndex);
+            audio.play();
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+        }
+
+        /**
+         * Triggers the download of the current song.
+         */
+        function downloadCurrentSong() {
+            if (audio.src && currentPlaylist[currentSongIndex]) {
+                const song = currentPlaylist[currentSongIndex];
+                const a = document.createElement('a');
+                a.href = audio.src;
+                a.download = `${song.title} - ${song.artist}.mp3`; // Suggest a filename
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showMessage(`Downloading: ${song.title} - ${song.artist}`);
+            } else {
+                showMessage("No song currently playing to download.");
+            }
+        }
+
+        /**
+         * Renders the current playlist in the main playlist UI and home UI.
+         */
+        function renderPlaylistsForAllViews() {
+            // Render for Playlists section (detailed list)
+            playlistItemsElement.innerHTML = '';
+            if (currentPlaylist.length === 0) {
+                playlistItemsElement.textContent = "This playlist is empty. Add some songs!";
+            } else {
+                currentPlaylist.forEach((song, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('p-2', 'rounded-lg', 'transition-colors', 'duration-200', 'flex', 'items-center', 'justify-between', 'mb-1');
+
+                    if (index === currentSongIndex) {
+                        listItem.classList.add('bg-blue-500', 'font-bold');
+                    } else {
+                        listItem.classList.add('hover:bg-gray-700');
+                        if (body.classList.contains('light-mode')) {
+                            listItem.classList.remove('hover:bg-gray-700');
+                            listItem.classList.add('hover:bg-gray-200');
+                        }
+                    }
+
+                    const songInfo = document.createElement('span');
+                    songInfo.textContent = `${index + 1}. ${song.title} - ${song.artist}`;
+                    songInfo.classList.add('flex-grow', 'cursor-pointer');
+                    songInfo.addEventListener('click', () => {
+                        currentSongIndex = index;
+                        loadSong(currentSongIndex);
+                        audio.play();
+                        playPauseIcon.classList.remove('fa-play');
+                        playPauseIcon.classList.add('fa-pause');
+                    });
+                    listItem.appendChild(songInfo);
+
+                    const removeButton = document.createElement('button');
+                    removeButton.classList.add('ml-4', 'text-red-300', 'hover:text-red-500', 'transition-colors', 'duration-200', 'focus:outline-none');
+                    removeButton.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    removeButton.title = `Remove ${song.title}`;
+                    removeButton.setAttribute('aria-label', `Remove ${song.title} from playlist`);
+                    removeButton.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        removeSongFromPlaylist(index);
+                    });
+                    listItem.appendChild(removeButton);
+                    playlistItemsElement.appendChild(listItem);
+                });
+            }
+
+            // Render for Home section (simplified list)
+            homePlaylistItems.innerHTML = '';
+            if (currentPlaylist.length === 0) {
+                homePlaylistItems.textContent = "Current playlist is empty.";
+            } else {
+                currentPlaylist.slice(0, 5).forEach((song, index) => { // Show first 5 songs
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('p-1', 'text-sm', 'text-gray-200');
+                    if (index === currentSongIndex) {
+                        listItem.classList.add('font-bold', 'text-blue-300');
+                    }
+                    listItem.textContent = `${index + 1}. ${song.title} - ${song.artist}`;
+                    homePlaylistItems.appendChild(listItem);
+                });
+                if (currentPlaylist.length > 5) {
+                    const moreItem = document.createElement('li');
+                    moreItem.classList.add('p-1', 'text-sm', 'text-gray-400', 'italic');
+                    moreItem.textContent = `...and ${currentPlaylist.length - 5} more.`;
+                    homePlaylistItems.appendChild(moreItem);
+                }
+            }
+            homeCurrentPlaylistNameDisplay.textContent = getPlaylistNameById(selectedPlaylistId);
+            currentPlaylistNameDisplay.textContent = getPlaylistNameById(selectedPlaylistId);
+        }
+
+        /**
+         * Saves the current playlist to Firestore.
+         */
+        async function savePlaylist() {
+            if (!userPlaylistsCollectionRef || !selectedPlaylistId) {
+                console.error("Firestore or selected playlist not ready.");
+                showMessage("Cannot save playlist. Please ensure you are logged in and a valid playlist is selected.");
+                return;
+            }
+            try {
+                const playlistDocRef = doc(userPlaylistsCollectionRef, selectedPlaylistId);
+                await setDoc(playlistDocRef, { songs: currentPlaylist, name: getPlaylistNameById(selectedPlaylistId) || selectedPlaylistId });
+                console.log(`Playlist '${selectedPlaylistId}' saved to Firestore!`);
+                showMessage(`Playlist '${getPlaylistNameById(selectedPlaylistId) || selectedPlaylistId}' saved successfully!`);
+            }
+            catch (error) {
+                console.error("Error saving playlist:", error);
+                showMessage("Error saving playlist. Please try again.");
+            }
+        }
+
+        /**
+         * Clears the current playlist and saves the empty playlist to Firestore.
+         */
+        async function clearPlaylist() {
+            if (currentPlaylist.length === 0) {
+                showMessage("Playlist is already empty!");
+                return;
+            }
+            currentPlaylist = [];
+            currentSongIndex = 0;
+            loadSong(currentSongIndex); // Load empty state in player
+            renderPlaylistsForAllViews(); // Update UI to show empty playlist
+            await savePlaylist(); // Save empty playlist to Firestore
+            console.log("Playlist cleared!");
+            showMessage("Current playlist cleared!");
+        }
+
+        /**
+         * Adds a new song to the current playlist.
+         * @param {string} title - The title of the song.
+         * @param {string} artist - The artist of the song.
+         * @param {string} src - The audio source URL for the song.
+         */
+        function addSongToPlaylist(title, artist, src) {
+            currentPlaylist.push({ title, artist, src });
+            renderPlaylistsForAllViews();
+            savePlaylist();
+        }
+
+        /**
+         * Removes a song from the current playlist by index.
+         * @param {number} indexToRemove - The index of the song to remove.
+         */
+        function removeSongFromPlaylist(indexToRemove) {
+            const removedSongTitle = currentPlaylist[indexToRemove]?.title || 'a song';
+            currentPlaylist.splice(indexToRemove, 1);
+            if (currentSongIndex >= currentPlaylist.length) {
+                currentSongIndex = Math.max(0, currentPlaylist.length - 1);
+            }
+            loadSong(currentSongIndex);
+            renderPlaylistsForAllViews();
+            savePlaylist();
+            showMessage(`'${removedSongTitle}' removed from playlist.`);
+        }
+
+        /**
+         * Fetches all playlist metadata for the current user.
+         */
+        async function fetchAvailablePlaylists() {
+            if (!userPlaylistsCollectionRef) {
+                console.error("User playlists collection not ready.");
+                return;
+            }
+            try {
+                const querySnapshot = await getDocs(userPlaylistsCollectionRef);
+                availablePlaylists = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name || doc.id // Use 'name' field if available, otherwise use ID
+                }));
+                
+                const hasMyPlaylist = availablePlaylists.some(p => p.id === 'myPlaylist');
+                if (!hasMyPlaylist) {
+                    const defaultPlaylistRef = doc(userPlaylistsCollectionRef, 'myPlaylist');
+                    await setDoc(defaultPlaylistRef, { name: 'My Playlist', songs: preloadedSongs });
+                    console.log("Created default playlist with preloaded song.");
+                    await fetchAvailablePlaylists(); 
+                    return; 
+                }
+
+                renderPlaylistsDropdown();
+                
+                const lastActivePlaylistId = localStorage.getItem('lastActivePlaylist');
+                if (lastActivePlaylistId && availablePlaylists.some(p => p.id === lastActivePlaylistId)) {
+                    loadPlaylist(lastActivePlaylistId);
+                } else if (availablePlaylists.length > 0) {
+                    loadPlaylist(availablePlaylists[0].id);
+                }
+
+            } catch (error) {
+                console.error("Error fetching available playlists:", error);
+                showMessage("Error loading your playlists. Please try refreshing.");
+            }
+        }
+
+        /**
+         * Populates the playlist selection dropdown.
+         */
+        function renderPlaylistsDropdown() {
+            const currentVal = playlistSelect.value;
+            playlistSelect.innerHTML = '';
+            if (availablePlaylists.length > 0) {
+                availablePlaylists.forEach(playlist => {
+                    const option = document.createElement('option');
+                    option.value = playlist.id;
+                    option.textContent = playlist.name;
+                    playlistSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No Playlists Available';
+                playlistSelect.appendChild(option);
+            }
+            playlistSelect.value = availablePlaylists.some(p => p.id === currentVal) ? currentVal : selectedPlaylistId;
+        }
+
+        /**
+         * Loads a specific playlist from Firestore.
+         * @param {string} playlistId - The ID of the playlist to load.
+         */
+        async function loadPlaylist(playlistId) {
+            if (!userPlaylistsCollectionRef || !playlistId) {
+                console.error("Cannot load playlist: Firestore or playlist ID not ready.");
+                return;
+            }
+            const playlistDocRef = doc(userPlaylistsCollectionRef, playlistId);
+            try {
+                const docSnap = await getDoc(playlistDocRef); // Use getDoc for one-time fetch
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentPlaylist = data.songs || [];
+                    selectedPlaylistId = playlistId;
+                    currentPlaylistNameDisplay.textContent = data.name || playlistId;
+                    homeCurrentPlaylistNameDisplay.textContent = data.name || playlistId; // Update home display
+                    localStorage.setItem('lastActivePlaylist', playlistId); // Save last active playlist
+                    console.log(`Playlist '${data.name || playlistId}' loaded.`);
+                    showMessage(`Playlist '${data.name || playlistId}' loaded.`);
+                } else {
+                    console.warn(`Playlist with ID '${playlistId}' not found. Creating it.`);
+                    await createNewPlaylist(playlistId === 'myPlaylist' ? 'My Playlist' : playlistId);
+                }
+                currentSongIndex = 0; // Reset song index for new playlist
+                loadSong(currentSongIndex);
+                renderPlaylistsDropdown(); // Update dropdown selection
+            } catch (error) {
+                console.error("Error loading playlist:", error);
+                showMessage("Error loading playlist. Please try again.");
+            }
+        }
+
+        /**
+         * Creates a new playlist.
+         * @param {string} name - The name of the new playlist.
+         * @param {boolean} [isDefault=false] - Whether this is a default playlist being created on app start.
+         */
+        async function createNewPlaylist(name, isDefault = false) {
+            const playlistName = name || newPlaylistNameInput.value.trim();
+            if (!playlistName) {
+                showMessage("Please enter a name for the new playlist.");
+                return;
+            }
+
+            const playlistId = playlistName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') + '-' + Date.now();
+
+            if (!userPlaylistsCollectionRef) {
+                console.error("User playlists collection not ready.");
+                showMessage("Cannot create playlist. Firebase not ready.");
+                return;
+            }
+
+            try {
+                const newPlaylistDocRef = doc(userPlaylistsCollectionRef, playlistId);
+                const initialSongs = availablePlaylists.length === 0 ? preloadedSongs : [];
+                await setDoc(newPlaylistDocRef, { songs: initialSongs, name: playlistName });
+                
+                if (!isDefault) {
+                    showMessage(`Playlist '${playlistName}' created successfully!`);
+                }
+                newPlaylistNameInput.value = '';
+
+                await fetchAvailablePlaylists();
+                loadPlaylist(playlistId);
+            } catch (error) {
+                console.error("Error creating new playlist:", error);
+                showMessage("Error creating playlist. Please try again.");
+            }
+        }
+
+        /**
+         * Deletes the currently selected playlist after confirmation.
+         */
+        async function deleteSelectedPlaylist() {
+            if (!selectedPlaylistId) {
+                showMessage("Please select a valid playlist to delete.");
+                return;
+            }
+            const realPlaylistsCount = availablePlaylists.length;
+            if (realPlaylistsCount <= 1) {
+                showMessage("Cannot delete the last playlist. Create another one first if you want to delete this one.");
+                return;
+            }
+
+            const playlistToDeleteName = getPlaylistNameById(selectedPlaylistId);
+            
+            showConfirmation(`Are you sure you want to delete playlist '${playlistToDeleteName}'? This action cannot be undone.`, async () => {
+                try {
+                    const playlistDocRef = doc(userPlaylistsCollectionRef, selectedPlaylistId);
+                    await deleteDoc(playlistDocRef);
+                    showMessage(`Playlist '${playlistToDeleteName}' deleted successfully.`);
+                    console.log(`Playlist '${selectedPlaylistId}' deleted from Firestore.`);
+
+                    await fetchAvailablePlaylists();
+                } catch (error) {
+                    console.error("Error deleting playlist:", error);
+                    showMessage("Error deleting playlist. Please try again.");
+                }
+            });
+        }
+
+        /**
+         * Helper to get playlist name by ID.
+         * @param {string} id - The ID of the playlist.
+         * @returns {string} The name of the playlist or its ID if not found.
+         */
+        function getPlaylistNameById(id) {
+            const playlist = availablePlaylists.find(p => p.id === id);
+            return playlist ? playlist.name : id;
+        }
+
+        /**
+         * Manages the visibility of different app sections.
+         * @param {string} sectionId - The ID of the section to show.
+         */
+        function showSection(sectionId) {
+            [homeSection, searchSection, playlistsSection].forEach(s => s.classList.add('hidden'));
+            [navHome, navSearch, navPlaylists].forEach(n => n.classList.remove('active'));
+
+            switch (sectionId) {
+                case 'homeSection':
+                    homeSection.classList.remove('hidden');
+                    navHome.classList.add('active');
+                    break;
+                case 'searchSection':
+                    searchSection.classList.remove('hidden');
+                    navSearch.classList.add('active');
+                    searchResultsOutput.innerHTML = 'Search results will appear here...';
+                    searchInput.value = '';
+                    break;
+                case 'playlistsSection':
+                    playlistsSection.classList.remove('hidden');
+                    navPlaylists.classList.add('active');
+                    break;
+            }
+        }
+
+        /**
+         * Performs a search across discoverable songs and the current playlist.
+         */
+        function performSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+            searchResultsOutput.innerHTML = '';
+
+            if (!query) {
+                searchResultsOutput.textContent = "Please enter a search query.";
+                return;
+            }
+
+            const uniqueResults = new Map();
+            currentPlaylist.forEach((song, index) => {
+                const songKey = `${song.title.toLowerCase()}|${song.artist.toLowerCase()}`;
+                if ((song.title.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query)) && !uniqueResults.has(songKey)) {
+                    uniqueResults.set(songKey, { ...song, type: 'existing', originalIndex: index });
+                }
+            });
+
+            const allSongsToSearch = [...preloadedSongs];
+            allSongsToSearch.forEach(song => {
+                const songKey = `${song.title.toLowerCase()}|${song.artist.toLowerCase()}`;
+                if ((song.title.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query)) && !uniqueResults.has(songKey)) {
+                    uniqueResults.set(songKey, { ...song, type: 'new' });
+                }
+            });
+
+            const foundSongs = Array.from(uniqueResults.values());
+
+            if (foundSongs.length === 0) {
+                searchResultsOutput.textContent = `No songs found matching "${searchInput.value}".`;
+                return;
+            }
+
+            const resultsList = document.createElement('ul');
+            foundSongs.forEach((song) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('p-2', 'rounded-lg', 'transition-colors', 'duration-200', 'hover:bg-gray-700', 'cursor-pointer', 'mb-1', 'flex', 'justify-between', 'items-center');
+                if (body.classList.contains('light-mode')) {
+                    listItem.classList.remove('hover:bg-gray-700');
+                    listItem.classList.add('hover:bg-gray-200');
+                }
+
+                const songText = document.createElement('span');
+                songText.textContent = `${song.title} - ${song.artist}`;
+                if (song.type === 'existing') {
+                    songText.textContent += " (In Playlist)";
+                    songText.classList.add('text-blue-300');
+                }
+                listItem.appendChild(songText);
+
+                const actionButton = document.createElement('button');
+                actionButton.classList.add('ml-4', 'text-white', 'text-xs', 'py-1', 'px-2', 'rounded-md', 'focus:outline-none');
+
+                if (song.type === 'existing') {
+                    actionButton.textContent = 'Play';
+                    actionButton.classList.add('bg-purple-500', 'hover:bg-purple-600');
+                    actionButton.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        currentSongIndex = song.originalIndex;
+                        loadSong(currentSongIndex);
+                        audio.play();
+                        playPauseIcon.classList.remove('fa-play');
+                        playPauseIcon.classList.add('fa-pause');
+                        showMessage(`Now playing: ${song.title}`);
+                        showSection('homeSection');
+                    });
+                } else { // type === 'new'
+                    actionButton.textContent = 'Add & Play';
+                    actionButton.classList.add('bg-green-500', 'hover:bg-green-600');
+                    actionButton.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        addSongToPlaylist(song.title, song.artist, song.src);
+                        const newIndex = currentPlaylist.length - 1;
+                        currentSongIndex = newIndex;
+                        loadSong(newIndex);
+                        audio.play();
+                        playPauseIcon.classList.remove('fa-play');
+                        playPauseIcon.classList.add('fa-pause');
+                        showMessage(`Added and playing: ${song.title}`);
+                        showSection('homeSection');
+                    });
+                }
+                listItem.appendChild(actionButton);
+                resultsList.appendChild(listItem);
+            });
+            searchResultsOutput.appendChild(resultsList);
+        }
+
+        // Initialize Firebase
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        userId = auth.currentUser?.uid || crypto.randomUUID();
+                    } catch (error) {
+                        console.error("Firebase authentication error:", error);
+                        userId = crypto.randomUUID();
+                    }
+                }
+                document.getElementById('userIdDisplay').textContent = `User ID: ${userId}`;
+
+                userPlaylistsCollectionRef = collection(db, 'artifacts', appId, 'users', userId, 'playlists');
+                await fetchAvailablePlaylists();
+                showSection('homeSection');
+            });
+        } catch (error) {
+            console.error("Failed to initialize Firebase:", error);
+            document.getElementById('userIdDisplay').textContent = `User ID: Error`;
+            userId = crypto.randomUUID();
+            currentPlaylist = preloadedSongs;
+            loadSong(0);
+            renderPlaylistsForAllViews();
+            showSection('homeSection');
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Event Listeners for Seek Bar
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                seekBar.value = audio.currentTime;
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            if (audio.duration) {
+                seekBar.max = audio.duration;
+                durationDisplay.textContent = formatTime(audio.duration);
+            }
+        });
+
+        seekBar.addEventListener('input', () => {
+            audio.currentTime = seekBar.value;
+        });
+
+
+        // Other Event Listeners
+        playPauseButton.addEventListener('click', playPauseSong);
+        nextButton.addEventListener('click', nextSong);
+        prevButton.addEventListener('click', prevSong);
+        audio.addEventListener('ended', nextSong);
+        downloadCurrentSongButton.addEventListener('click', downloadCurrentSong);
+        saveCurrentPlaylistButton.addEventListener('click', savePlaylist);
+        clearCurrentPlaylistButton.addEventListener('click', clearPlaylist);
+        playlistSelect.addEventListener('change', () => loadPlaylist(playlistSelect.value));
+        loadSelectedPlaylistButton.addEventListener('click', () => loadPlaylist(playlistSelect.value));
+        deleteSelectedPlaylistButton.addEventListener('click', deleteSelectedPlaylist);
+        createNewPlaylistButton.addEventListener('click', () => createNewPlaylist());
+        performSearchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') performSearch();
+        });
+        importFileButton.addEventListener('click', () => importFileInput.click());
+        importFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const fileName = file.name.toLowerCase();
+                let importedSongs = [];
+
+                if (fileName.endsWith('.txt')) {
+                    importedSongs = parseTxtFile(content);
+                } else if (fileName.endsWith('.csv')) {
+                    importedSongs = parseCsvFile(content);
+                } else {
+                    showMessage("Unsupported file type. Please upload a .txt or .csv file.");
+                    return;
+                }
+
+                if (importedSongs.length > 0) {
+                    if (!selectedPlaylistId) {
+                         showMessage("Please select an existing playlist or create a new one before importing songs.");
+                         return;
+                    }
+                    currentPlaylist = currentPlaylist.concat(importedSongs);
+                    renderPlaylistsForAllViews();
+                    savePlaylist();
+                    showMessage(`Successfully imported ${importedSongs.length} songs to '${getPlaylistNameById(selectedPlaylistId)}' from ${file.name}!`);
+                } else {
+                    showMessage(`No valid songs found in ${file.name}. Please check the file format.`);
+                }
+                importFileInput.value = '';
+            };
+            reader.onerror = () => showMessage("Error reading file.");
+            reader.readAsText(file);
+        });
+
+        function parseTxtFile(content) {
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            const songs = [];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                let title = '', artist = '', src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3";
+
+                if (i + 1 < lines.length && (lines[i+1].trim().startsWith('http') || lines[i+1].trim().startsWith('data:'))) {
+                    const songInfo = line;
+                    const url = lines[i+1].trim();
+                    const dashParts = songInfo.split(' - ').map(part => part.trim());
+                    if (dashParts.length >= 2) {
+                        title = dashParts[0];
+                        artist = dashParts.slice(1).join(' - ');
+                        src = url;
+                    }
+                    i++; 
+                }
+                else if (line.includes('|')) {
+                    const pipeParts = line.split('|').map(part => part.trim());
+                    if (pipeParts.length === 3) {
+                        [title, artist, src] = pipeParts;
+                    }
+                }
+                else if (line.includes(' - ')) {
+                    const dashParts = line.split(' - ').map(part => part.trim());
+                    if (dashParts.length >= 2) {
+                        title = dashParts[0];
+                        artist = dashParts.slice(1).join(' - ');
+                    }
+                }
+                else {
+                    title = line;
+                    artist = "Unknown Artist";
+                }
+
+                if (title && artist) {
+                    if (src.includes('youtube.com') || src.includes('youtu.be')) {
+                        console.warn(`Added song "${title}" with a YouTube link. This app cannot play YouTube videos directly and requires a direct .mp3 link.`);
+                        showMessage(`Warning: '${title}' was added with a YouTube link and will not play. The app requires direct .mp3 links.`);
+                    }
+                    songs.push({ title, artist, src });
+                } else {
+                    console.warn(`Skipping unparseable TXT line: ${line}`);
+                }
+            }
+            return songs;
+        }
+
+        function parseCsvFile(content) {
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return [];
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const titleIndex = headers.indexOf('title'), artistIndex = headers.indexOf('artist'), urlIndex = headers.indexOf('url');
+            if (titleIndex === -1 || artistIndex === -1 || urlIndex === -1) {
+                showMessage("CSV file must contain 'Title', 'Artist', and 'URL' headers.");
+                return [];
+            }
+            const songs = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length > Math.max(titleIndex, artistIndex, urlIndex)) {
+                    const title = values[titleIndex], artist = values[artistIndex], src = values[urlIndex];
+                    if (title && artist && src && (src.startsWith('http://') || src.startsWith('https://'))) {
+                        songs.push({ title, artist, src });
+                    }
+                }
+            }
+            return songs;
+        }
+
+        function toggleTheme() {
+            body.classList.toggle('light-mode');
+            if (body.classList.contains('light-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'dark');
+            }
+            renderPlaylistsForAllViews();
+        }
+
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+        }
+
+        applySavedTheme();
+        themeToggle.addEventListener('click', toggleTheme);
+        navHome.addEventListener('click', () => showSection('homeSection'));
+        navSearch.addEventListener('click', () => showSection('searchSection'));
+        navPlaylists.addEventListener('click', () => showSection('playlistsSection'));
+    </script>
+</body>
+</html>
